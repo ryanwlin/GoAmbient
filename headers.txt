@@ -1,0 +1,70 @@
+date,A,Human Readable Date, string (converted on server from dateutc)
+tempf,B,Outdoor Temperature, ºF
+humidity,C,Outdoor Humidity, 0-100%
+windspeedmph,D,Instantaneous wind speed, mph
+windgustmph,E,Max wind speed in the last 10 minutes, mph
+maxdailygust,F,Maximum wind speed in last day, mph
+baromrelin,G,Relative Pressure, inHg
+baromabsin,H,Absolute Pressure, inHg
+solarradiation,I,Solar Radiation, W/m^2
+uv,J,Ultra-Violet Radiation Index, integer on all devices EXCEPT WS-8478.
+feelsLike,K,If < 50ºF => Wind Chill, if > 68ºF => Heat Index (calculated on server)
+dewPoint,L,Dew Point, ºF (calculated on server)
+tempinf,M,Indoor Temperature, ºF
+humidityin,N,Indoor Humidity, 0-100%
+battout,O,Outdoor Battery - OK/Low indication, Int, 1=OK, 0=Low
+batt_co2,P,CO2 battery - 1=OK, 0=Low
+feelsLikein,Q,Indoor Feels Like
+dewPointin,R,Indoor Dew Point
+winddir,S,Instantaneous wind direction, 0-360º
+hourlyrainin,T,Hourly Rain Rate, in/hr
+eventrainin,U,Event Rain, in
+dailyrainin,V,Daily Rain, in
+weeklyrainin,W,Weekly Rain, in
+monthlyrainin,X,Monthly Rain, in
+totalrainin,Y,Total Rain, in (since last factory reset)
+lastRain,Z,Last time hourlyrainin > 0, date (calculated on server)
+dateutc,AA,Datetime, int (milliseconds from 01-01-1970, rounded down to nearest minute on server)
+
+windgustdir,AB,Wind direction at which the wind gust occurred, 0-360º
+windspdmph_avg2m,AC,Average wind speed, 2 minute average, mph
+winddir_avg2m,AD,Average wind direction, 2 minute average, mph
+windspdmph_avg10m,AE,Average wind speed, 10 minute average, mph
+winddir_avg10m,AF,Average wind direction, 10 minute average, 0-360º
+soiltemp1f,AG,Soil Temperature 1, ºF
+soilhum1,AH,Soil Humidity 1, %
+leafwetness1,AI,Leaf Wetness 1, Int, %
+soiltens1,AJ,Soil Tension 1, Float, cb
+gdd,AK,Growing Degree Days, Int, days
+etos,AL,Evapotranspiration short, Float, in/day
+etrs,AM,Evapotranspiration, tall, Float, in/day
+battin,AN,Indoor Battery - OK/Low indication, Int, 1=OK, 0=Low
+batt_25,AO,PM2.5 Air Quality Sensor Battery indication, OK/Low indication, Int, 1=OK, 0=Low
+batt_lightning,AP,Lightning Detector Battery - 1=Low 0=OK
+batleak1,AQ,Leak Detector Battery - 1=Low 0=OK
+battsm1,AR,Soil Moisture Battery - 1=OK, 0=Low
+batt_cellgateway,AS,Cellular Gateway - 1=OK, 0=Low
+24hourrainin,AT,24 Hour Rain, in
+pm25,AU,PM2.5 Air Quality, Float, µg/m^3
+pm25_24h,AV,PM2.5 Air Quality 24 hour average, Float, µg/m^3
+pm25_in,AW,PM2.5 Air Quality, Indoor, Float, µg/m^3
+pm25_in_24h,AX,PM2.5 Air Quality 24 hour average, Indoor, Float, µg/m^3
+pm25_in_aqin,AY,PM2.5 Air Quality Sensor indoor, AQIN sensor, Float, µg/m^3
+pm25_in_24h_aqin,AZ,PM2.5 Air Quality Sensor indoor, 24 hour running average, AQIN sensor, Float, µg/m^3
+pm10_in_aqin,BA,PM10 Air Quality Sensor, Float, µg/m^3
+pm10_in_24h_aqin,BB,PM10 Air Quality Sensor, 24 hour running average, Float, µg/m^3
+co2_in_aqin,BC,Indoor CO2 from AQIN, Int, ppm
+co2_in_24h_aqin,BD,Indoor CO2 from AQIN, 24 hour running average, Int, ppm
+pm_in_temp_aqin,BE,Indoor PM sensor temperature, Float, ºF
+pm_in_humidity_aqin,BF,Indoor PM sensor humidity, Int, %
+aqi_pm25_aqin,BG,AQI derived from PM25, AQIN sensor, Int
+aqi_pm25_24h_aqin,BH,AQI derived from PM25 Indoor, 24 hour running average, AQIN sensor, Int
+aqi_pm10_aqin,BI,AQI derived from PM10 Indoor, AQIN sensor, Int
+aqi_pm10_24h_aqin,BJ,AQI derived from PM10 Indoor, 24 hour running average, AQIN sensor, Int
+aqi_pm25_in,BK,AQI derived from PM25 IN, Int
+aqi_pm25_in_24h,BL,AQI derived from PM25 IN, 24 hour running average, Int
+lightning_day,BM,Lightning strikes per day, int
+lightning_hour,BN,Lightning strikes per hour, int
+lightning_time,BO,Last strike time, Datetime
+relay1,BP,Relay 1, 0 or 1
+relay2,BQ,Relay 2, 0 or 1
