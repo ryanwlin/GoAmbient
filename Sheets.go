@@ -175,7 +175,9 @@ func createSheet(sheetName string) {
 	}
 	slog.Info("Sheet created successfully", "sheetName", sheetName)
 }
+func batchUpdateRequest(sheetName string, runs int) {
 
+}
 func stringToNum(letters string) int {
 	result := 0
 	for _, letter := range letters {
