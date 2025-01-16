@@ -124,6 +124,14 @@ func writeData(data string) {
 }
 
 func updateValues(sheetName string, values [][]interface{}, valuesRange string, runs int) {
+	fullRange := sheetName + valuesRange
+	body := &sheets.ValueRange{Values: values}
+
+	_, err := service.Spreadsheets.Values.Update(spreadsheetId, fullRange, body).
+		ValueInputOption("RAW").Do()
+	if err != nil {
+		slog.Warn("Unable to update values in sheet: %v", err)
+	}
 
 }
 
@@ -157,7 +165,7 @@ func sheetExists(sheetName string) {
 }
 
 func createSheet(sheetName string) {
-	request := &sheets.BatchUpdateSpreadsheetRequest{
+	createRequest := &sheets.BatchUpdateSpreadsheetRequest{
 		Requests: []*sheets.Request{
 			{
 				AddSheet: &sheets.AddSheetRequest{
@@ -169,7 +177,7 @@ func createSheet(sheetName string) {
 		},
 	}
 
-	response := batchUpdateRequest(request, 1)
+	response := batchUpdateRequest(createRequest, 1)
 	if response == nil {
 		slog.Error("Unable to complete batch update request")
 		return
@@ -180,25 +188,36 @@ func createSheet(sheetName string) {
 
 		slog.Info("Batch update request to freeze first row")
 
-		gridProperties := &sheets.GridProperties{
-			FrozenRowCount: 1,
-		}
-
-		sheetProperties := &sheets.SheetProperties{
-			SheetId:        response.Replies[0].AddSheet.Properties.SheetId,
-			GridProperties: gridProperties,
-		}
-		freezeRequest := &sheets.Request{
-			UpdateSheetProperties: &sheets.UpdateSheetPropertiesRequest{
-				Properties: sheetProperties,
-				Fields:     "gridProperties.frozenRowCount",
+		freezeProperties := &sheets.SheetProperties{
+			SheetId: response.Replies[0].AddSheet.Properties.SheetId,
+			GridProperties: &sheets.GridProperties{
+				FrozenRowCount: 1,
 			},
 		}
-		batchRequest := &sheets.BatchUpdateSpreadsheetRequest{
-			Requests: []*sheets.Request{freezeRequest},
+
+		freezeRequest := &sheets.BatchUpdateSpreadsheetRequest{
+			Requests: []*sheets.Request{
+				&sheets.Request{
+					UpdateSheetProperties: &sheets.UpdateSheetPropertiesRequest{
+						Properties: freezeProperties,
+						Fields:     "gridProperties.frozenRowCount",
+					},
+				},
+			},
 		}
 
-		batchUpdateRequest(batchRequest, 0)
+		batchUpdateRequest(freezeRequest, 0)
+
+		var sheetHeaders [][]interface{}
+
+		headerRow := make([]interface{}, len(allSensors))
+		for i, sensor := range allSensors {
+			headerRow[stringToNum(i)] = sensor.Description
+		}
+
+		sheetHeaders = append(sheetHeaders, headerRow)
+
+		updateValues(sheetName, sheetHeaders, "!A1", 1)
 	}
 
 }
@@ -217,7 +236,7 @@ func stringToNum(letters string) int {
 		currVal := int(letter-'A') + 1
 		result = result*26 + currVal
 	}
-	return result
+	return result - 1
 }
 
 func readSensors() {
@@ -235,10 +254,10 @@ func readSensors() {
 			slog.Warn("Invalid line in headers.txt: %v", line)
 		}
 		sensor := SensorInfo{
-			ID:          strings.TrimSpace(splitLine[1]),
+			ID:          strings.TrimSpace(splitLine[0]),
 			Description: strings.TrimSpace(splitLine[2]),
 		}
-		allSensors[splitLine[0]] = sensor
+		allSensors[splitLine[1]] = sensor
 
 	}
 }
