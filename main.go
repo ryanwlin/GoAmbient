@@ -23,9 +23,6 @@ func main() {
 	creatURL(secret[0], secret[1], secret[2])
 	slog.Info("Starting scheduled API calls")
 
-	data := executeRequest(0)
-	writeData(data)
-
 	scheduleAPI()
 
 }
@@ -40,6 +37,8 @@ func scheduleAPI() {
 
 	time.Sleep(waitDuration)
 	slog.Info("API Function called at: ", "time", time.Now())
-	executeRequest(0)
+	data := executeRequest(0)
+	writeData(data)
+
 	scheduleAPI()
 }

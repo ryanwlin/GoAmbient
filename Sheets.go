@@ -113,19 +113,26 @@ func writeData(data string) {
 
 	splitData := strings.Split(data, ",")
 
-	for _, item := range splitData {
-		slog.Info(item)
-	}
-
 	emptyRow := len(sheetData) + 1
 
-	updateValues(strconv.Itoa(year), sheetData, writeRange+strconv.Itoa(emptyRow), 0)
+	var dataSheet [][]interface{}
+	dataRow := make([]interface{}, len(allSensors))
+	for _, item := range splitData {
+		dataParts := strings.Split(item, ":")
+		position := allSensors[strings.Trim(dataParts[0], "\"")].ID
+		dataRow[stringToNum(position)] = dataParts[1]
+	}
+
+	dataSheet = append(dataSheet, dataRow)
+
+	updateValues(strconv.Itoa(year), dataSheet, "!A"+strconv.Itoa(emptyRow), 0)
 
 }
 
-func updateValues(sheetName string, values [][]interface{}, valuesRange string, runs int) {
+func updateValues(sheetName string, writeValues [][]interface{}, valuesRange string, runs int) {
 	fullRange := sheetName + valuesRange
-	body := &sheets.ValueRange{Values: values}
+	body := &sheets.ValueRange{Values: writeValues}
+	slog.Info("full range" + fullRange)
 
 	_, err := service.Spreadsheets.Values.Update(spreadsheetId, fullRange, body).
 		ValueInputOption("RAW").Do()
@@ -211,8 +218,8 @@ func createSheet(sheetName string) {
 		var sheetHeaders [][]interface{}
 
 		headerRow := make([]interface{}, len(allSensors))
-		for i, sensor := range allSensors {
-			headerRow[stringToNum(i)] = sensor.Description
+		for _, sensor := range allSensors {
+			headerRow[stringToNum(sensor.ID)] = sensor.Description
 		}
 
 		sheetHeaders = append(sheetHeaders, headerRow)
@@ -254,10 +261,10 @@ func readSensors() {
 			slog.Warn("Invalid line in headers.txt: %v", line)
 		}
 		sensor := SensorInfo{
-			ID:          strings.TrimSpace(splitLine[0]),
+			ID:          strings.TrimSpace(splitLine[1]),
 			Description: strings.TrimSpace(splitLine[2]),
 		}
-		allSensors[splitLine[1]] = sensor
+		allSensors[splitLine[0]] = sensor
 
 	}
 }
