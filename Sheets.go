@@ -169,14 +169,47 @@ func createSheet(sheetName string) {
 		},
 	}
 
-	_, err := service.Spreadsheets.BatchUpdate(spreadsheetId, request).Do()
-	if err != nil {
-		log.Fatalf("Unable to create sheet: %v", err)
+	response := batchUpdateRequest(request, 1)
+	if response == nil {
+		slog.Error("Unable to complete batch update request")
+		return
 	}
-	slog.Info("Sheet created successfully", "sheetName", sheetName)
-}
-func batchUpdateRequest(sheetName string, runs int) {
 
+	if len(response.Replies) > 0 && response.Replies[0].AddSheet != nil {
+		slog.Info("Sheet created successfully", "sheetName", sheetName)
+
+		slog.Info("Batch update request to freeze first row")
+
+		gridProperties := &sheets.GridProperties{
+			FrozenRowCount: 1,
+		}
+
+		sheetProperties := &sheets.SheetProperties{
+			SheetId:        response.Replies[0].AddSheet.Properties.SheetId,
+			GridProperties: gridProperties,
+		}
+		freezeRequest := &sheets.Request{
+			UpdateSheetProperties: &sheets.UpdateSheetPropertiesRequest{
+				Properties: sheetProperties,
+				Fields:     "gridProperties.frozenRowCount",
+			},
+		}
+		batchRequest := &sheets.BatchUpdateSpreadsheetRequest{
+			Requests: []*sheets.Request{freezeRequest},
+		}
+
+		batchUpdateRequest(batchRequest, 0)
+	}
+
+}
+func batchUpdateRequest(batchRequest *sheets.BatchUpdateSpreadsheetRequest, runs int) *sheets.BatchUpdateSpreadsheetResponse {
+	var response *sheets.BatchUpdateSpreadsheetResponse = nil
+	slog.Info("Requesting new batch update")
+	response, err := service.Spreadsheets.BatchUpdate(spreadsheetId, batchRequest).Do()
+	if err != nil {
+		slog.Warn("Unable to create sheet: %v", err)
+	}
+	return response
 }
 func stringToNum(letters string) int {
 	result := 0
