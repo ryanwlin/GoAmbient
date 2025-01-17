@@ -1,20 +1,20 @@
 package main
 
 import (
-	"io/ioutil"
 	"log/slog"
+	"os"
 	"strings"
 	"time"
 )
 
 func main() {
-	readSensors()
+	readSensors(1)
 	slog.Info("Start program at", "time", time.Now())
 
 	slog.Info("Initializing Sheets")
 	initalizeSheet(1)
 
-	secretFile, err := ioutil.ReadFile("secrets.txt")
+	secretFile, err := os.ReadFile("secrets.txt")
 	if err != nil {
 		slog.Warn("Unable to read headers.txt: %v", err)
 	}
@@ -33,11 +33,14 @@ func scheduleAPI() {
 	nextRun := currentTime.Truncate(time.Minute).Add(5 * time.Minute)
 	nextRun = nextRun.Truncate(5 * time.Minute)
 	waitDuration := time.Until(nextRun)
-	slog.Info("Next API call scheduled at: ", "time", nextRun)
+	slog.Info("Next API call scheduled at:", "time", nextRun)
 
 	time.Sleep(waitDuration)
 	slog.Info("API Function called at: ", "time", time.Now())
 	data := executeRequest(0)
+	if data == "" {
+		slog.Error("API request resulted in empty values")
+	}
 	writeData(data)
 
 	scheduleAPI()

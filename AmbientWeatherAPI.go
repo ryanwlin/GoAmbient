@@ -1,10 +1,10 @@
 package main
 
 import (
-	"io/ioutil"
-	"log"
+	"io"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -25,25 +25,23 @@ func creatURL(macAddress string, apiKey string, appKey string) {
 func executeRequest(runs int) string {
 	resp, err := http.Get(completeURL)
 	if err != nil {
-		slog.Warn("An error occurred", "error", err)
-		time.Sleep(time.Duration(5 * runs))
-		return retryAPICall(runs)
+		return retryAPICall(runs, "Error occurred when trying to execute API request: "+err.Error())
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			return
+		}
+	}(resp.Body)
 
-	log.Println("response Status:", resp.Status)
-
+	slog.Info("Response Status:", "resp", resp.Status)
 	if resp.StatusCode != http.StatusOK {
-		slog.Warn("Error: received status code %d", resp.StatusCode)
-		time.Sleep(time.Duration(5 * runs))
-		return retryAPICall(runs)
+		return retryAPICall(runs, "Error: Received error status code "+strconv.Itoa(resp.StatusCode))
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		slog.Warn("An error occurred", "error", err)
-		time.Sleep(time.Duration(5 * runs))
-		return retryAPICall(runs)
+		return retryAPICall(runs, "Error occurred when trying read response: "+err.Error())
 	}
 
 	slog.Info(string(body))
@@ -54,11 +52,15 @@ func executeRequest(runs int) string {
 	return trimData
 }
 
-func retryAPICall(runs int) string {
+func retryAPICall(runs int, info string) string {
 	if runs < 3 {
+		wait := 10 * runs
+		slog.Warn("Warning #" + strconv.Itoa(runs) + ". Error: " + info + " retrying after " +
+			strconv.Itoa(wait) + " second wait.")
+		time.Sleep(time.Duration(wait) * time.Second)
 		return executeRequest(runs + 1)
 	} else {
-		slog.Error("Error: API call failed 3 times")
+		slog.Error("Error after 3 attempts: " + info + " returning back to caller method")
 		return ""
 	}
 }
